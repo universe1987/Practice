@@ -1,11 +1,12 @@
 def test(f, arr, k):
     global call_count
-    call_count = 0
+    call_count = [0, 0, 0]
     best_v, best_split = f(arr, k)
+    print '-' * 20
     print 'result is', best_v
     print 'best split is', best_split
     print 'array size is', len(arr)
-    print call_count, 'function calls'
+    print '{} tail calls, {} cached calls, {} effective calls'.format(*call_count)
 
 
 def cumsum(arr):
@@ -19,15 +20,17 @@ def cumsum(arr):
 
 def opt_split(cum, begin, k, cache):
     global call_count
-    call_count += 1
 
     if k == 1:
+        call_count[0] += 1
         return cum[-1] - cum[begin], []
     if (begin, k) in cache:
+        call_count[1] += 1
         return cache[(begin, k)]
+    call_count[2] += 1
     # find the first time that the sum of first chunk surpasses
     # the optimal splitting of the rest of the array
-    left, right = begin, len(cum) - 2
+    left, right = begin, len(cum) - k
     while right > left + 1:
         mid = (left + right) / 2
         s1 = cum[mid] - cum[begin]
@@ -65,8 +68,7 @@ if __name__ == '__main__':
     arr.extend([100] * 100)
     arr.extend([1000] * 10)
     arr.append(9001)
-    call_count = 0
+    call_count = [0, 0, 0]
     test(solution, arr, 5)
-
     arr = [1, 1, 1, 1, 1, 1, 1, 100, 1]
     test(solution, arr, 5)
