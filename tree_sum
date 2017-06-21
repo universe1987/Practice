@@ -1,0 +1,61 @@
+from collections import defaultdict
+
+
+class Node(object):
+    def __init__(self, val):
+        self.val = val
+        self.left = None
+        self.right = None
+
+
+def tree_sum(root, target):
+    if not root:
+        return [], {}, {}
+    result = []
+    left_path = defaultdict(list)
+    right_path = defaultdict(list)
+    x = root.val
+    if x == target:
+        result.append([x])
+
+    left_result, left_left, left_right = tree_sum(root.left, target)
+    result.extend(left_result)
+    right_result, right_left, right_right = tree_sum(root.right, target)
+    result.extend(right_result)
+
+    left_path[x].append([x])
+    right_path[x].append([x])
+
+    for k, v in left_left.iteritems():
+        for arr in v:
+            left_path[x + k].append(arr + [x])
+
+    for k, v in left_right.iteritems():
+        for arr in v:
+            if len(arr) > 1:
+                left_path[x + k].append(arr + [x])
+
+    for k, v in right_left.iteritems():
+        for arr in v:
+            right_path[x + k].append(arr + [x])
+
+    for k, v in right_right.iteritems():
+        for arr in v:
+            if len(arr) > 1:
+                right_path[x + k].append(arr + [x])
+
+    for k, v in left_path.iteritems():
+        if target + x - k in right_path:
+            w = right_path[target + x - k]
+            for vv in v:
+                for ww in w:
+                    result.append(vv[:-1] + [x] + ww[:-1][::-1])
+
+    return result, left_path, right_path
+
+
+root = Node(1)
+root.left = Node(2)
+root.right = Node(3)
+root.left.left = Node(4)
+print tree_sum(root, 6)
